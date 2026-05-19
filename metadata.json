@@ -1,0 +1,8 @@
+{
+  "name": "Anjo da Guarda",
+  "description": "Descubra qual é o seu anjo da guarda e sintonize sua vibração em um teste de 30 segundos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
