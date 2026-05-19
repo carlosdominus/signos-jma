@@ -34,7 +34,7 @@ export const MARITAL_STATUSES = [
 ];
 
 export const CHALLENGES = [
-  "Vida Amorosa", "Finanças", "Saúde", "Felicidadee"
+  "Vida Amorosa", "Finanças", "Saúde", "Felicidade"
 ];
 
 export const GENDERS = ["Masculino", "Feminino"];

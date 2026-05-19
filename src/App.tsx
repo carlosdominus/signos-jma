@@ -220,12 +220,21 @@ function VSLStep() {
 }
 
 function ImagePreloader() {
+  const extraImages = [
+    "felicidade.png", "saude.png", "finanças.png", "vidaamorosa.png",
+    "viuvo.png", "separado.png", "solteiro.png", "noivo.png",
+    "namorando.png", "casado.png", "female.png", "masculine.png"
+  ];
+
   return (
     <div className="fixed opacity-0 pointer-events-none -z-50 overflow-hidden w-0 h-0">
       {ZODIAC_SIGNS.map(sign => (
         <img key={sign.id} src={sign.image} alt="" loading="eager" />
       ))}
       <img src={`${IMAGE_ROOT}fundo.png`} alt="" loading="eager" />
+      {extraImages.map(img => (
+        <img key={img} src={`${IMAGE_ROOT}${img}`} alt="" loading="eager" />
+      ))}
     </div>
   );
 }
@@ -420,8 +429,12 @@ function Step7({ onSelect, onBack }: { onSelect: (gender: Gender) => void, onBac
             onClick={() => onSelect(gender as Gender)}
             className="flex flex-col items-center justify-center bg-white py-5 px-8 rounded-2xl shadow-xl hover:scale-[1.03] transition-all group active:scale-95 duration-300"
           >
-            <div className={`mb-2 text-4xl ${gender === "Masculino" ? "text-blue-500" : "text-pink-500"} transform group-hover:rotate-6 transition-transform`}>
-               {gender === "Masculino" ? "♂" : "♀"}
+            <div className="mb-2 w-12 h-12 transform group-hover:rotate-6 transition-transform">
+               <img 
+                 src={`${IMAGE_ROOT}${gender === "Masculino" ? "masculine.png" : "female.png"}`} 
+                 alt={gender}
+                 className="w-full h-full object-contain"
+               />
             </div>
             <span className="font-black text-blue-900 text-lg uppercase tracking-tighter">{gender}</span>
           </button>
@@ -515,26 +528,46 @@ function BackButton({ onClick }: { onClick: () => void }) {
 }
 
 function StatusIcon({ status }: { status: MaritalStatus }) {
-  // Rough implementation of the icons in Step 5
-  switch(status) {
-    case "Casado(a)": return <div className="text-3xl">🤝</div>;
-    case "Namorando": return <div className="text-3xl">💕</div>;
-    case "Noivo(a)": return <div className="text-3xl">💍</div>;
-    case "Solteiro(a)": return <div className="text-3xl">🤍</div>;
-    case "Separado(a)": return <div className="text-3xl">🧩</div>;
-    case "Viúvo(a)": return <div className="text-3xl">💔</div>;
-    default: return null;
-  }
+  const getIcon = (s: string) => {
+    switch(s) {
+      case "Casado(a)": return "casado.png";
+      case "Namorando": return "namorando.png";
+      case "Noivo(a)": return "noivo.png";
+      case "Solteiro(a)": return "solteiro.png";
+      case "Separado(a)": return "separado.png";
+      case "Viúvo(a)": return "viuvo.png";
+      default: return "";
+    }
+  };
+
+  const iconName = getIcon(status);
+  if (!iconName) return null;
+
+  return (
+    <div className="w-12 h-12">
+      <img src={`${IMAGE_ROOT}${iconName}`} alt={status} className="w-full h-full object-contain" />
+    </div>
+  );
 }
 
 function ChallengeIcon({ challenge }: { challenge: LifeChallenge }) {
-  // Rough implementation of the icons in Step 6
-  switch(challenge) {
-    case "Vida Amorosa": return <div className="text-3xl">💍</div>;
-    case "Finanças": return <div className="text-3xl">💰</div>;
-    case "Saúde": return <div className="text-3xl">💓</div>;
-    case "Felicidadee": return <div className="text-3xl">🙌</div>;
-    default: return null;
-  }
+  const getIcon = (c: string) => {
+    switch(c) {
+      case "Vida Amorosa": return "vidaamorosa.png";
+      case "Finanças": return "finanças.png";
+      case "Saúde": return "saude.png";
+      case "Felicidade": return "felicidade.png";
+      default: return "";
+    }
+  };
+
+  const iconName = getIcon(challenge);
+  if (!iconName) return null;
+
+  return (
+    <div className="w-12 h-12">
+      <img src={`${IMAGE_ROOT}${iconName}`} alt={challenge} className="w-full h-full object-contain" />
+    </div>
+  );
 }
 

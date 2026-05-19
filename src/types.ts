@@ -25,7 +25,7 @@ export type LifeChallenge =
   | "Vida Amorosa"
   | "Finanças"
   | "Saúde"
-  | "Felicidadee";
+  | "Felicidade";
 
 export type Gender = "Masculino" | "Feminino";
 
