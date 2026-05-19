@@ -195,6 +195,15 @@ function VSLStep() {
 
   return (
     <div className="w-full py-4 space-y-6">
+      <div className="text-center px-2">
+        <h2 className="text-xl md:text-2xl font-black text-blue-100 leading-tight mb-2 drop-shadow-lg">
+          O poderoso Canto de São Miguel para Restaurar Saúde e Obter Riqueza foi liberado!
+        </h2>
+        <p className="text-yellow-400 font-bold uppercase tracking-widest text-xs md:text-sm animate-bounce">
+          Assista para ter acesso👇
+        </p>
+      </div>
+
       <div className="bg-blue-500/10 backdrop-blur-xl border border-white/10 rounded-[30px] p-2 overflow-hidden shadow-2xl shadow-blue-500/20">
         {/* @ts-ignore - custom element from vturb */}
         <vturb-smartplayer 
