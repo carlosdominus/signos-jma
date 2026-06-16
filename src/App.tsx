@@ -225,6 +225,9 @@ function Step1({ onSelect }: { onSelect: (sign: ZodiacSign, day: number, month: 
   const handleDaySelect = (day: number, month: number) => {
     setSelectedDay(day);
     setSelectedMonth(month);
+    if (selectedSign) {
+      onSelect(selectedSign, day, month);
+    }
   };
 
   const renderMonth = (monthIndex: number, startDay: number, endDay: number) => {
@@ -324,14 +327,6 @@ function Step1({ onSelect }: { onSelect: (sign: ZodiacSign, day: number, month: 
           </motion.div>
         )}
       </AnimatePresence>
-
-      <button
-        onClick={() => selectedSign && selectedDay !== undefined && selectedMonth !== undefined && onSelect(selectedSign, selectedDay, selectedMonth)}
-        disabled={!selectedSign || selectedDay === undefined}
-        className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-blue-950 font-black py-4 rounded-xl shadow-[0_4px_15px_rgba(234,179,8,0.3)] transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none uppercase tracking-wider text-sm text-center"
-      >
-        Continuar para o Próximo Passo
-      </button>
     </div>
   );
 }
@@ -388,7 +383,10 @@ function Step2({ onSelect, onBack }: { onSelect: (decade: number, year: number) 
                 return (
                   <button
                     key={year}
-                    onClick={() => setSelectedYear(year)}
+                    onClick={() => {
+                      setSelectedYear(year);
+                      onSelect(selectedDecade, year);
+                    }}
                     className={`font-extrabold py-2.5 rounded-lg shadow-md transition-all text-xs ${
                       isSel ? "bg-yellow-400 text-blue-950 ring-2 ring-yellow-200" : "bg-white text-blue-900 hover:bg-blue-50"
                     }`}
@@ -402,14 +400,6 @@ function Step2({ onSelect, onBack }: { onSelect: (decade: number, year: number) 
         )}
       </AnimatePresence>
 
-      <button
-        onClick={() => selectedDecade && selectedYear && onSelect(selectedDecade, selectedYear)}
-        disabled={!selectedDecade || !selectedYear}
-        className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-blue-950 font-black py-4 rounded-xl shadow-[0_4px_15px_rgba(234,179,8,0.3)] transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none uppercase tracking-wider text-sm text-center"
-      >
-        Continuar para o Próximo Passo
-      </button>
-
       <BackButton onClick={onBack} />
     </div>
   );
@@ -418,6 +408,20 @@ function Step2({ onSelect, onBack }: { onSelect: (decade: number, year: number) 
 function Step3({ onSelect, onBack }: { onSelect: (status: MaritalStatus, challenge: LifeChallenge) => void, onBack: () => void }) {
   const [selectedStatus, setSelectedStatus] = useState<MaritalStatus | undefined>(undefined);
   const [selectedChallenge, setSelectedChallenge] = useState<LifeChallenge | undefined>(undefined);
+
+  const handleSelectStatus = (status: MaritalStatus) => {
+    setSelectedStatus(status);
+    if (selectedChallenge) {
+      onSelect(status, selectedChallenge);
+    }
+  };
+
+  const handleSelectChallenge = (challenge: LifeChallenge) => {
+    setSelectedChallenge(challenge);
+    if (selectedStatus) {
+      onSelect(selectedStatus, challenge);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center">
@@ -432,7 +436,7 @@ function Step3({ onSelect, onBack }: { onSelect: (status: MaritalStatus, challen
           return (
             <button
               key={status}
-              onClick={() => setSelectedStatus(status as MaritalStatus)}
+              onClick={() => handleSelectStatus(status as MaritalStatus)}
               className={`flex flex-col items-center justify-center border p-3 rounded-xl transition-all group duration-300 ${
                 isSel 
                   ? "bg-yellow-400/20 border-yellow-400 ring-1 ring-yellow-400" 
@@ -459,7 +463,7 @@ function Step3({ onSelect, onBack }: { onSelect: (status: MaritalStatus, challen
           return (
             <button
               key={challenge}
-              onClick={() => setSelectedChallenge(challenge as LifeChallenge)}
+              onClick={() => handleSelectChallenge(challenge as LifeChallenge)}
               className={`flex flex-col items-center justify-center border py-4 rounded-xl transition-all group duration-300 ${
                 isSel 
                   ? "bg-yellow-400/20 border-yellow-400 ring-1 ring-yellow-400" 
@@ -474,14 +478,6 @@ function Step3({ onSelect, onBack }: { onSelect: (status: MaritalStatus, challen
           );
         })}
       </div>
-
-      <button
-        onClick={() => selectedStatus && selectedChallenge && onSelect(selectedStatus, selectedChallenge)}
-        disabled={!selectedStatus || !selectedChallenge}
-        className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-blue-950 font-black py-4 rounded-xl shadow-[0_4px_15px_rgba(234,179,8,0.3)] transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none uppercase tracking-wider text-sm text-center"
-      >
-        Continuar para o Próximo Passo
-      </button>
 
       <BackButton onClick={onBack} />
     </div>
