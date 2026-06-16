@@ -36,7 +36,7 @@ export default function App() {
     setState((prev) => ({ ...prev, currentStep: Math.max(1, prev.currentStep - 1) }));
   };
 
-  const progress = (state.currentStep / 10) * 100;
+  const progress = (state.currentStep / 4) * 100;
 
   return (
     <div className="min-h-screen bg-[#07132a] text-white font-sans relative overflow-x-hidden selection:bg-yellow-400 selection:text-blue-900">
@@ -51,7 +51,7 @@ export default function App() {
       />
 
       <div className="relative z-10 max-w-lg mx-auto px-5 py-4 flex flex-col min-h-screen">
-        {state.currentStep <= 8 && (
+        {state.currentStep <= 4 && (
           <>
             {/* Header Alert - More Compact */}
             <div className="bg-red-600/90 backdrop-blur-md rounded-xl py-2 px-6 flex items-center justify-center gap-2 mb-4 shadow-[0_0_15px_rgba(220,38,38,0.3)] border border-red-500/50 animate-pulse">
@@ -74,7 +74,7 @@ export default function App() {
             <div className="mb-6">
               <div className="flex justify-center mb-1">
                 <span className="text-[9px] text-blue-300 font-bold tracking-widest uppercase opacity-70">
-                  Passo {state.currentStep} de 8
+                  Passo {state.currentStep} de 4
                 </span>
               </div>
               <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
@@ -100,62 +100,40 @@ export default function App() {
               transition={{ duration: 0.4, ease: "easeInOut" }}
               className="flex-grow flex flex-col"
             >
-              {state.currentStep === 1 && <Step1 onSelect={(sign) => nextStep({ sign })} />}
-              {state.currentStep === 2 && state.sign && (
+              {state.currentStep === 1 && (
+                <Step1 
+                  onSelect={(sign, day, month) => nextStep({ sign, birthDay: day, birthMonth: month })} 
+                />
+              )}
+              {state.currentStep === 2 && (
                 <Step2 
-                  sign={state.sign} 
-                  onSelect={(day, month) => nextStep({ birthDay: day, birthMonth: month })}
+                  onSelect={(decade, year) => nextStep({ decade, year })} 
                   onBack={prevStep}
                 />
               )}
               {state.currentStep === 3 && (
                 <Step3 
-                  onSelect={(decade) => nextStep({ decade })} 
+                  onSelect={(status, challenge) => nextStep({ maritalStatus: status, challenge })} 
                   onBack={prevStep}
                 />
               )}
-              {state.currentStep === 4 && state.decade && (
+              {state.currentStep === 4 && (
                 <Step4 
-                  decade={state.decade}
-                  onSelect={(year) => nextStep({ year })} 
+                  onSelect={(gender, name) => nextStep({ gender, firstName: name })} 
                   onBack={prevStep}
                 />
               )}
               {state.currentStep === 5 && (
-                <Step5 
-                  onSelect={(status) => nextStep({ maritalStatus: status })} 
-                  onBack={prevStep}
-                />
+                <LoadingStep onComplete={() => setState(prev => ({ ...prev, currentStep: 6 }))} />
               )}
               {state.currentStep === 6 && (
-                <Step6 
-                  onSelect={(challenge) => nextStep({ challenge })} 
-                  onBack={prevStep}
-                />
-              )}
-              {state.currentStep === 7 && (
-                <Step7 
-                  onSelect={(gender) => nextStep({ gender })} 
-                  onBack={prevStep}
-                />
-              )}
-              {state.currentStep === 8 && (
-                <Step8 
-                  onComplete={(name) => nextStep({ firstName: name })} 
-                  onBack={prevStep}
-                />
-              )}
-              {state.currentStep === 9 && (
-                <LoadingStep onComplete={() => setState(prev => ({ ...prev, currentStep: 10 }))} />
-              )}
-              {state.currentStep === 10 && (
                 <VSLStep />
               )}
             </motion.div>
           </AnimatePresence>
         </div>
 
-        {state.currentStep <= 8 && (
+        {state.currentStep <= 4 && (
           /* Footer Privacy - More Compact */
           <div className="mt-6 pt-4 border-t border-white/5">
             <div className="flex items-center justify-center gap-3 mb-4">
@@ -239,38 +217,16 @@ function ImagePreloader() {
   );
 }
 
-function Step1({ onSelect }: { onSelect: (sign: ZodiacSign) => void }) {
-  return (
-    <div className="flex flex-col items-center text-center">
-      <ImagePreloader />
-      <h3 className="text-[22px] font-black mb-6 uppercase tracking-tight bg-gradient-to-b from-white to-blue-200 bg-clip-text text-transparent italic">
-        Clique no SEU SIGNO
-      </h3>
-      <div className="grid grid-cols-3 gap-3 w-full">
-        {ZODIAC_SIGNS.map((sign, index) => (
-          <button
-            id={`sign-${sign.id}`}
-            key={sign.id}
-            onClick={() => onSelect(sign)}
-            className="group relative flex flex-col items-center justify-center bg-white rounded-xl p-2 md:p-3 shadow-[0_6px_15px_rgba(0,0,0,0.15)] hover:ring-2 hover:ring-yellow-400 transition-all hover:scale-[1.03] active:scale-95 duration-300"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-white rounded-xl -z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <img 
-              src={sign.image} 
-              alt={sign.name} 
-              className="w-10 h-10 md:w-12 md:h-12 object-contain mb-1.5 group-hover:brightness-110 group-hover:scale-110 transition-transform duration-500" 
-              referrerPolicy="no-referrer"
-              fetchPriority={index < 6 ? "high" : "auto"}
-            />
-            <span className="text-blue-900 font-extrabold text-[9px] md:text-[10px] uppercase text-center tracking-tight leading-tight">{sign.name}</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
+function Step1({ onSelect }: { onSelect: (sign: ZodiacSign, day: number, month: number) => void }) {
+  const [selectedSign, setSelectedSign] = useState<ZodiacSign | undefined>(ZODIAC_SIGNS[0]);
+  const [selectedDay, setSelectedDay] = useState<number | undefined>(undefined);
+  const [selectedMonth, setSelectedMonth] = useState<number | undefined>(undefined);
 
-function Step2({ sign, onSelect, onBack }: { sign: ZodiacSign, onSelect: (day: number, month: number) => void, onBack: () => void }) {
+  const handleDaySelect = (day: number, month: number) => {
+    setSelectedDay(day);
+    setSelectedMonth(month);
+  };
+
   const renderMonth = (monthIndex: number, startDay: number, endDay: number) => {
     const days = [];
     for (let i = startDay; i <= endDay; i++) {
@@ -278,21 +234,27 @@ function Step2({ sign, onSelect, onBack }: { sign: ZodiacSign, onSelect: (day: n
     }
 
     return (
-      <div key={monthIndex} className="mb-6 w-full">
-        <div className="bg-blue-500/30 backdrop-blur-sm border border-blue-400/20 py-1.5 rounded-xl mb-3">
-          <h4 className="text-center font-extrabold text-lg tracking-tight">{MONTH_NAMES[monthIndex]}</h4>
+      <div key={monthIndex} className="w-full">
+        <div className="bg-blue-500/20 backdrop-blur-sm border border-blue-400/10 py-1 px-4 rounded-xl mb-2">
+          <h4 className="text-center font-extrabold text-xs tracking-tight uppercase text-blue-200">{MONTH_NAMES[monthIndex]}</h4>
         </div>
-        <div className="grid grid-cols-5 gap-2">
-          {days.map(day => (
-            <button
-               id={`day-${monthIndex}-${day}`}
-               key={day}
-               onClick={() => onSelect(day, monthIndex)}
-               className="bg-white text-blue-900 font-extrabold py-3 rounded-xl shadow-md hover:bg-blue-50 transition-all active:scale-90 text-sm md:text-base"
-            >
-              {day}
-            </button>
-          ))}
+        <div className="grid grid-cols-7 gap-1.5 justify-center">
+          {days.map(day => {
+            const isSel = selectedDay === day && selectedMonth === monthIndex;
+            return (
+              <button
+                 key={day}
+                 onClick={() => handleDaySelect(day, monthIndex)}
+                 className={`font-extrabold py-2 rounded-lg shadow-md transition-all active:scale-90 text-[11px] md:text-sm ${
+                   isSel 
+                     ? "bg-yellow-400 text-blue-950 ring-2 ring-yellow-200" 
+                     : "bg-white text-blue-900 hover:bg-blue-50"
+                 }`}
+              >
+                {day}
+              </button>
+            );
+          })}
         </div>
       </div>
     );
@@ -302,176 +264,292 @@ function Step2({ sign, onSelect, onBack }: { sign: ZodiacSign, onSelect: (day: n
 
   return (
     <div className="flex flex-col items-center">
-      <h3 className="text-2xl font-extrabold mb-10 bg-gradient-to-b from-white to-blue-200 bg-clip-text text-transparent text-center leading-tight">
-        Qual é o seu Dia de Nascimento?
-      </h3>
+      <ImagePreloader />
       
-      <div className="w-full flex flex-col items-center">
-        {renderMonth(sign.startMonth, sign.startDay, getMaxDays(sign.startMonth))}
-        {renderMonth(sign.endMonth, 1, sign.endDay)}
+      <div className="mb-4 text-center">
+        <span className="text-yellow-400 font-black text-xs uppercase tracking-wider block mb-1">Passo 1 de 2: Signo</span>
+        <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">
+          Qual é o seu signo?
+        </h3>
+      </div>
+      
+      <div className="grid grid-cols-4 gap-2 w-full mb-6">
+        {ZODIAC_SIGNS.map((sign, index) => {
+          const isSel = selectedSign?.id === sign.id;
+          return (
+            <button
+              key={sign.id}
+              onClick={() => {
+                setSelectedSign(sign);
+                setSelectedDay(undefined);
+                setSelectedMonth(undefined);
+              }}
+              className={`group relative flex flex-col items-center justify-center rounded-xl p-1.5 shadow-[0_4px_10px_rgba(0,0,0,0.15)] hover:ring-2 hover:ring-yellow-400 transition-all hover:scale-[1.03] active:scale-95 duration-350 ${
+                isSel ? "ring-2 ring-yellow-400 bg-blue-900/40" : "bg-white"
+              }`}
+            >
+              <img 
+                src={sign.image} 
+                alt={sign.name} 
+                className="w-8 h-8 object-contain mb-1 group-hover:scale-105 transition-transform duration-300" 
+                referrerPolicy="no-referrer"
+              />
+              <span className={`font-extrabold text-[8px] uppercase text-center tracking-tight leading-tight ${
+                isSel ? "text-yellow-400" : "text-blue-900"
+              }`}>{sign.name}</span>
+            </button>
+          );
+        })}
       </div>
 
-      <BackButton onClick={onBack} />
-    </div>
-  );
-}
-
-function Step3({ onSelect, onBack }: { onSelect: (decade: number) => void, onBack: () => void }) {
-  return (
-    <div className="flex flex-col items-center">
-      <div className="bg-blue-400/30 backdrop-blur-sm border border-blue-300/20 py-3 px-6 rounded-2xl mb-6 w-full">
-        <h3 className="text-lg font-extrabold uppercase tracking-tight text-center italic">EM QUE DÉCADA VOCÊ NASCEU?</h3>
-      </div>
-      <div className="grid grid-cols-2 gap-3 w-full">
-        {DECADES.map(decade => (
-          <button
-            id={`decade-${decade}`}
-            key={decade}
-            onClick={() => onSelect(decade)}
-            className="bg-white text-blue-900 font-extrabold py-4 rounded-xl shadow-lg hover:ring-2 hover:ring-yellow-400/50 transition-all hover:scale-[1.02] active:scale-95 duration-300"
+      <AnimatePresence mode="wait">
+        {selectedSign && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="w-full space-y-4 mb-6 border-t border-white/5 pt-4"
           >
-            {decade}
-          </button>
-        ))}
-      </div>
-      <BackButton onClick={onBack} />
-    </div>
-  );
-}
-
-function Step4({ decade, onSelect, onBack }: { decade: number, onSelect: (year: number) => void, onBack: () => void }) {
-  const years = Array.from({ length: 10 }, (_, i) => decade + i);
-  return (
-    <div className="flex flex-col items-center">
-      <div className="bg-blue-400/30 backdrop-blur-sm border border-blue-300/20 py-3 px-6 rounded-2xl mb-6 w-full">
-        <h3 className="text-lg font-extrabold uppercase tracking-tight text-center italic">EM QUE ANO VOCÊ NASCEU?</h3>
-      </div>
-      <div className="grid grid-cols-3 gap-2 w-full">
-        {years.map(year => (
-          <button
-            id={`year-${year}`}
-            key={year}
-            onClick={() => onSelect(year)}
-            className="bg-white text-blue-900 font-extrabold py-4 rounded-xl shadow-lg hover:ring-2 hover:ring-yellow-400/50 transition-all hover:scale-[1.02] active:scale-95 duration-300"
-          >
-            {year}
-          </button>
-        ))}
-      </div>
-      <BackButton onClick={onBack} />
-    </div>
-  );
-}
-
-function Step5({ onSelect, onBack }: { onSelect: (status: MaritalStatus) => void, onBack: () => void }) {
-  return (
-    <div className="flex flex-col items-center">
-      <div className="bg-blue-400/30 backdrop-blur-sm border border-blue-300/20 py-3 px-6 rounded-2xl mb-6 w-full">
-        <h3 className="text-lg font-extrabold uppercase tracking-tight text-center italic">QUAL É O SEU ESTADO CIVIL?</h3>
-      </div>
-      <div className="grid grid-cols-2 gap-3 w-full">
-        {MARITAL_STATUSES.map(status => (
-          <button
-            id={`marital-${status}`}
-            key={status}
-            onClick={() => onSelect(status as MaritalStatus)}
-            className="flex flex-col items-center justify-center bg-blue-500/10 border border-white/5 py-6 rounded-2xl shadow-xl hover:bg-blue-500/20 hover:border-white/20 transition-all group duration-300"
-          >
-            <div className="mb-2 text-3xl transform group-hover:scale-110 transition-transform duration-500">
-               <StatusIcon status={status as MaritalStatus} />
+            <div className="text-center">
+              <span className="text-yellow-400 font-black text-xs uppercase tracking-wider block mb-1">Passo 2 de 2: Dia</span>
+              <h3 className="text-sm font-bold uppercase tracking-tight text-blue-200">
+                Selecione o Dia do seu Nascimento:
+              </h3>
             </div>
-            <span className="font-extrabold text-[12px] uppercase tracking-tight">{status}</span>
-          </button>
-        ))}
-      </div>
-      <BackButton onClick={onBack} />
+            
+            <div className="space-y-4 w-full">
+              {renderMonth(selectedSign.startMonth, selectedSign.startDay, getMaxDays(selectedSign.startMonth))}
+              {renderMonth(selectedSign.endMonth, 1, selectedSign.endDay)}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <button
+        onClick={() => selectedSign && selectedDay !== undefined && selectedMonth !== undefined && onSelect(selectedSign, selectedDay, selectedMonth)}
+        disabled={!selectedSign || selectedDay === undefined}
+        className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-blue-950 font-black py-4 rounded-xl shadow-[0_4px_15px_rgba(234,179,8,0.3)] transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none uppercase tracking-wider text-sm text-center"
+      >
+        Continuar para o Próximo Passo
+      </button>
     </div>
   );
 }
 
-function Step6({ onSelect, onBack }: { onSelect: (challenge: LifeChallenge) => void, onBack: () => void }) {
+function Step2({ onSelect, onBack }: { onSelect: (decade: number, year: number) => void, onBack: () => void }) {
+  const [selectedDecade, setSelectedDecade] = useState<number | undefined>(1980);
+  const [selectedYear, setSelectedYear] = useState<number | undefined>(undefined);
+
+  const years = selectedDecade ? Array.from({ length: 10 }, (_, i) => selectedDecade + i) : [];
+
   return (
     <div className="flex flex-col items-center">
-      <div className="bg-blue-400/30 backdrop-blur-sm border border-blue-300/20 py-3 px-6 rounded-2xl mb-6 w-full">
-        <h3 className="text-lg font-extrabold uppercase tracking-tight text-center leading-tight italic">QUAL É O MAIOR DESAFIO?</h3>
+      <div className="text-center mb-4 w-full">
+        <span className="text-yellow-400 font-black text-xs uppercase tracking-wider block mb-1">Passo 1 de 2: Década</span>
+        <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">Qual Década Você Nasceu?</h3>
       </div>
-      <div className="grid grid-cols-2 gap-3 w-full">
-        {CHALLENGES.map(challenge => (
-          <button
-            id={`challenge-${challenge}`}
-            key={challenge}
-            onClick={() => onSelect(challenge as LifeChallenge)}
-            className="flex flex-col items-center justify-center bg-blue-500/10 border border-white/5 py-6 rounded-2xl shadow-xl hover:bg-blue-500/20 hover:border-white/20 transition-all group duration-300"
+      
+      <div className="grid grid-cols-4 gap-2 w-full mb-6">
+        {DECADES.map(decade => {
+          const isSel = selectedDecade === decade;
+          return (
+            <button
+              key={decade}
+              onClick={() => {
+                setSelectedDecade(decade);
+                setSelectedYear(undefined);
+              }}
+              className={`font-extrabold py-3 rounded-xl shadow-md transition-all text-sm ${
+                isSel ? "bg-yellow-400 text-blue-950 ring-2 ring-yellow-250" : "bg-white text-blue-900 hover:bg-blue-50"
+              }`}
+            >
+              {decade}s
+            </button>
+          );
+        })}
+      </div>
+
+      <AnimatePresence mode="wait">
+        {selectedDecade && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="w-full space-y-3 mb-6 border-t border-white/5 pt-4"
           >
-            <div className="mb-2 text-3xl transform group-hover:scale-110 transition-transform duration-500">
-               <ChallengeIcon challenge={challenge as LifeChallenge} />
+            <div className="text-center">
+              <span className="text-yellow-400 font-black text-xs uppercase tracking-wider block mb-1">Passo 2 de 2: Ano</span>
+              <h3 className="text-sm font-bold uppercase tracking-tight text-blue-200 mb-2">Em qual Ano específico?</h3>
             </div>
-            <span className="font-extrabold text-[12px] uppercase tracking-tight line-clamp-1 px-1">{challenge}</span>
-          </button>
-        ))}
-      </div>
+            
+            <div className="grid grid-cols-5 gap-2 w-full">
+              {years.map(year => {
+                const isSel = selectedYear === year;
+                return (
+                  <button
+                    key={year}
+                    onClick={() => setSelectedYear(year)}
+                    className={`font-extrabold py-2.5 rounded-lg shadow-md transition-all text-xs ${
+                      isSel ? "bg-yellow-400 text-blue-950 ring-2 ring-yellow-200" : "bg-white text-blue-900 hover:bg-blue-50"
+                    }`}
+                  >
+                    {year}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <button
+        onClick={() => selectedDecade && selectedYear && onSelect(selectedDecade, selectedYear)}
+        disabled={!selectedDecade || !selectedYear}
+        className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-blue-950 font-black py-4 rounded-xl shadow-[0_4px_15px_rgba(234,179,8,0.3)] transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none uppercase tracking-wider text-sm text-center"
+      >
+        Continuar para o Próximo Passo
+      </button>
+
       <BackButton onClick={onBack} />
     </div>
   );
 }
 
-function Step7({ onSelect, onBack }: { onSelect: (gender: Gender) => void, onBack: () => void }) {
+function Step3({ onSelect, onBack }: { onSelect: (status: MaritalStatus, challenge: LifeChallenge) => void, onBack: () => void }) {
+  const [selectedStatus, setSelectedStatus] = useState<MaritalStatus | undefined>(undefined);
+  const [selectedChallenge, setSelectedChallenge] = useState<LifeChallenge | undefined>(undefined);
+
   return (
     <div className="flex flex-col items-center">
-      <div className="bg-blue-400/30 backdrop-blur-sm border border-blue-300/20 py-3 px-6 rounded-2xl mb-6 w-full">
-        <h3 className="text-lg font-extrabold uppercase tracking-tight text-center italic">QUAL É O SEU SEXO?</h3>
+      <div className="text-center mb-4 w-full">
+        <span className="text-yellow-400 font-black text-xs uppercase tracking-wider block mb-1">Passo 1 de 2: Relacionamento</span>
+        <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">Qual É O Seu Estado Civil?</h3>
       </div>
-      <div className="flex flex-col gap-3 w-full max-w-[220px]">
-        {GENDERS.map(gender => (
-          <button
-            id={`gender-${gender}`}
-            key={gender}
-            onClick={() => onSelect(gender as Gender)}
-            className="flex flex-col items-center justify-center bg-white py-5 px-8 rounded-2xl shadow-xl hover:scale-[1.03] transition-all group active:scale-95 duration-300"
-          >
-            <div className="mb-2 w-12 h-12 transform group-hover:rotate-6 transition-transform">
-               <img 
-                 src={`${IMAGE_ROOT}${gender === "Masculino" ? "masculine.png" : "female.png"}`} 
-                 alt={gender}
-                 className="w-full h-full object-contain"
-               />
-            </div>
-            <span className="font-black text-blue-900 text-lg uppercase tracking-tighter">{gender}</span>
-          </button>
-        ))}
+      
+      <div className="grid grid-cols-3 gap-2 w-full mb-6">
+        {MARITAL_STATUSES.map(status => {
+          const isSel = selectedStatus === status;
+          return (
+            <button
+              key={status}
+              onClick={() => setSelectedStatus(status as MaritalStatus)}
+              className={`flex flex-col items-center justify-center border p-3 rounded-xl transition-all group duration-300 ${
+                isSel 
+                  ? "bg-yellow-400/20 border-yellow-400 ring-1 ring-yellow-400" 
+                  : "bg-blue-500/5 border-white/5 hover:bg-blue-500/10 hover:border-white/15"
+              }`}
+            >
+              <div className="mb-1 transform group-hover:scale-110 transition-transform duration-300">
+                 <StatusIcon status={status as MaritalStatus} />
+              </div>
+              <span className={`font-black text-[9px] uppercase tracking-tight ${isSel ? "text-yellow-400" : "text-blue-100"}`}>{status}</span>
+            </button>
+          );
+        })}
       </div>
+
+      <div className="text-center mb-4 w-full border-t border-white/5 pt-4">
+        <span className="text-yellow-400 font-black text-xs uppercase tracking-wider block mb-1">Passo 2 de 2: Desafio</span>
+        <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">Qual É O Seu Maior Desafio Atualmente?</h3>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 w-full mb-6">
+        {CHALLENGES.map(challenge => {
+          const isSel = selectedChallenge === challenge;
+          return (
+            <button
+              key={challenge}
+              onClick={() => setSelectedChallenge(challenge as LifeChallenge)}
+              className={`flex flex-col items-center justify-center border py-4 rounded-xl transition-all group duration-300 ${
+                isSel 
+                  ? "bg-yellow-400/20 border-yellow-400 ring-1 ring-yellow-400" 
+                  : "bg-blue-500/5 border-white/5 hover:bg-blue-500/10 hover:border-white/15"
+              }`}
+            >
+              <div className="mb-1.5 transform group-hover:scale-110 transition-transform duration-300">
+                 <ChallengeIcon challenge={challenge as LifeChallenge} />
+              </div>
+              <span className={`font-black text-xs uppercase tracking-tight ${isSel ? "text-yellow-400" : "text-blue-100"}`}>{challenge}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <button
+        onClick={() => selectedStatus && selectedChallenge && onSelect(selectedStatus, selectedChallenge)}
+        disabled={!selectedStatus || !selectedChallenge}
+        className="w-full mt-4 bg-gradient-to-r from-yellow-500 to-yellow-400 hover:from-yellow-400 hover:to-yellow-300 text-blue-950 font-black py-4 rounded-xl shadow-[0_4px_15px_rgba(234,179,8,0.3)] transition-all active:scale-95 disabled:opacity-40 disabled:pointer-events-none uppercase tracking-wider text-sm text-center"
+      >
+        Continuar para o Próximo Passo
+      </button>
+
       <BackButton onClick={onBack} />
     </div>
   );
 }
 
-function Step8({ onComplete, onBack }: { onComplete: (name: string) => void, onBack: () => void }) {
+function Step4({ onSelect, onBack }: { onSelect: (gender: Gender, name: string) => void, onBack: () => void }) {
+  const [selectedGender, setSelectedGender] = useState<Gender | undefined>(undefined);
   const [name, setName] = useState("");
 
+  const isComplete = selectedGender !== undefined && name.trim().length >= 2;
+
   return (
     <div className="flex flex-col items-center">
-      <div className="bg-blue-400/30 backdrop-blur-sm border border-blue-300/20 py-3 px-6 rounded-2xl mb-6 w-full">
-        <h3 className="text-lg font-extrabold uppercase tracking-tight text-center italic">QUAL É O SEU NOME?</h3>
+      <div className="text-center mb-4 w-full">
+        <span className="text-yellow-400 font-black text-xs uppercase tracking-wider block mb-1">Passo 1 de 2: Gênero</span>
+        <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">Qual É O Seu Sexo?</h3>
       </div>
       
-      <div className="w-full max-w-[300px] flex flex-col gap-6">
+      <div className="flex gap-4 w-full max-w-[280px] mb-6 justify-center">
+        {GENDERS.map(gender => {
+          const isSel = selectedGender === gender;
+          return (
+            <button
+              key={gender}
+              onClick={() => setSelectedGender(gender as Gender)}
+              className={`flex flex-col items-center justify-center py-4 px-6 rounded-2xl shadow-xl transition-all group active:scale-95 duration-350 w-28 ${
+                isSel 
+                  ? "bg-yellow-400 ring-2 ring-yellow-200 scale-105" 
+                  : "bg-white hover:bg-slate-50"
+              }`}
+            >
+              <div className="mb-1.5 w-10 h-10 transform group-hover:rotate-6 transition-transform">
+                 <img 
+                   src={`${IMAGE_ROOT}${gender === "Masculino" ? "masculine.png" : "female.png"}`} 
+                   alt={gender}
+                   className="w-full h-full object-contain"
+                 />
+              </div>
+              <span className={`font-black text-xs uppercase tracking-tighter ${
+                isSel ? "text-blue-950" : "text-blue-900"
+              }`}>{gender}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="text-center mb-4 w-full border-t border-white/5 pt-4">
+        <span className="text-yellow-400 font-black text-xs uppercase tracking-wider block mb-1">Passo 2 de 2: Nome</span>
+        <h3 className="text-lg font-black uppercase tracking-tight text-white mb-2">Qual É O Seu Nome?</h3>
+      </div>
+
+      <div className="w-full max-w-[320px] flex flex-col gap-4">
         <input 
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Digite seu nome"
-          className="w-full bg-white text-blue-900 font-extrabold py-4 px-6 rounded-xl shadow-inner text-center text-xl focus:outline-none focus:ring-4 focus:ring-yellow-400/50 placeholder:text-gray-400 transition-all uppercase tracking-tighter"
-          autoFocus
+          className="w-full bg-white text-blue-900 font-extrabold py-3.5 px-6 rounded-xl shadow-inner text-center text-lg focus:outline-none focus:ring-4 focus:ring-yellow-400/50 placeholder:text-gray-400 transition-all uppercase tracking-tighter"
         />
 
         <button
-          id="btn-continue"
-          onClick={() => name.length > 1 && onComplete(name)}
-          disabled={name.length < 2}
-          className="relative bg-gradient-to-b from-blue-400 to-blue-600 text-white font-extrabold py-5 px-8 rounded-full shadow-[0_4px_0_rgba(15,23,42,0.8)] hover:brightness-110 hover:-translate-y-1 active:translate-y-1 active:shadow-none transition-all text-lg uppercase tracking-tight disabled:opacity-50 group overflow-hidden"
+          onClick={() => isComplete && onSelect(selectedGender!, name)}
+          disabled={!isComplete}
+          className="relative bg-gradient-to-b from-blue-400 to-blue-600 text-white font-extrabold py-4 rounded-full shadow-[0_4px_0_rgba(15,23,42,0.8)] hover:brightness-110 active:translate-y-0.5 active:shadow-sm disabled:opacity-40 disabled:pointer-events-none transition-all text-base uppercase tracking-tight group overflow-hidden mt-2"
         >
           <span className="absolute inset-x-0 bottom-0 h-1 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500" />
-          PRÓXIMO PASSO
+          Revelar Meu Vídeo
         </button>
       </div>
 
