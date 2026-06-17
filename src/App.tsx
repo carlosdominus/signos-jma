@@ -161,7 +161,7 @@ function VSLStep() {
   useEffect(() => {
     // Inject Vturb script
     const script = document.createElement("script");
-    script.src = "https://scripts.converteai.net/853c4f04-8442-44da-b89d-0541d78036bb/ab-test/69eedc3979a9b357d912fa23/player.js";
+    script.src = "https://scripts.converteai.net/853c4f04-8442-44da-b89d-0541d78036bb/ab-test/6a327df37945c2426d82b2c7/player.js";
     script.async = true;
     document.head.appendChild(script);
 
@@ -185,7 +185,7 @@ function VSLStep() {
       <div className="bg-blue-500/10 backdrop-blur-xl border border-white/10 rounded-[30px] p-2 overflow-hidden shadow-2xl shadow-blue-500/20">
         {/* @ts-ignore - custom element from vturb */}
         <vturb-smartplayer 
-          id="ab-69eedc3979a9b357d912fa23" 
+          id="ab-6a327df37945c2426d82b2c7" 
           style={{ display: "block", margin: "0 auto", width: "100%" }}
         />
       </div>
